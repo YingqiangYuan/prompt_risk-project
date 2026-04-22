@@ -16,3 +16,7 @@ class OneBotoSesMixin:
             profile_name="yuan_yingqiang_dev",
             region_name="us-east-1",
         )
+
+    @cached_property
+    def bedrock_runtime_client(self: "One"):
+        return self.boto_ses.client("bedrock-runtime")

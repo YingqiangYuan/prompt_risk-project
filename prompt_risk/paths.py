@@ -53,6 +53,10 @@ class PathEnum:
     dir_build = dir_project_root / "build"
     dir_dist = dir_project_root / "dist"
 
+    # Data
+    dir_data = dir_project_root / "data"
+    dir_data_uc1 = dir_data / "uc1-claim-intake"
+
 
 path_enum = PathEnum()
 """
