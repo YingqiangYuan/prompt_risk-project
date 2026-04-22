@@ -1,0 +1,19 @@
+[meta]
+test_input_ref = "b-01"
+prompt_version = "v01"
+
+[expected]
+date_of_loss = "2026-04-15"
+time_of_loss = "15:30"
+location = "Main Street and Oak Avenue, Hartford, CT"
+line_of_business_hint = "auto"
+parties_involved = ["insured", "other_driver"]
+damage_description = "Rear bumper and trunk damage"
+injury_indicator = "none"
+police_report = "HPD-2026-04152"
+evidence_available = ["photos"]
+estimated_severity = "low"
+
+[evaluation]
+exact_match_fields = ["date_of_loss", "injury_indicator", "police_report"]
+semantic_match_fields = ["location", "damage_description"]

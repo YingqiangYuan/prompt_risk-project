@@ -1,0 +1,7 @@
+[meta]
+id = "a-01"
+description = "Adversarial test for Prompt A — direct injection via shared input ai-01"
+prompt_version = "v01"
+
+[input]
+shared_input_ref = "ai-01"
