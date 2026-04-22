@@ -109,18 +109,9 @@ data/
 
 ### Prompt File (`v01.md`)
 
-Prompt files are plain Markdown. The front matter records metadata; the body is the actual prompt text that gets sent to the LLM.
+Prompt files are plain Markdown with no front matter — pure prompt text that gets sent to the LLM. Model selection and other runtime configuration are handled by the calling code, not embedded in the prompt file.
 
 ```markdown
----
-prompt_id: uc1-prompt-a
-version: 1
-author: <author>
-date: 2026-04-22
-description: Extracts structured fields from raw FNOL narrative
-target_model: claude-sonnet-4-6
----
-
 You are a claims intake specialist. Given the following First Notice of Loss
 (FNOL) narrative, extract the structured fields listed below.
 

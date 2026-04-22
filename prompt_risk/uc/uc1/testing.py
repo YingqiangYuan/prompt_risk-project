@@ -22,27 +22,12 @@ def _load_toml(path: Path) -> dict:
     return tomllib.loads(path.read_text())
 
 
-def _load_prompt_template(prompt_dir: Path, version: str = "v01") -> tuple[str, str]:
+def _load_prompt_template(prompt_dir: Path, version: str = "v01") -> str:
     """
-    Load a prompt markdown file. Returns (model_id, prompt_body).
-
-    The front matter contains ``target_model``; the body after the second
-    ``---`` is the actual prompt text.
+    Load a prompt markdown file as plain text.
     """
     path = prompt_dir / f"{version}.md"
-    text = path.read_text()
-    # split on "---" fences: ['', frontmatter, body]
-    parts = text.split("---", 2)
-    frontmatter = parts[1]
-    body = parts[2].strip()
-
-    model_id = "us.amazon.nova-2-lite-v1:0"
-    for line in frontmatter.strip().splitlines():
-        if line.startswith("target_model:"):
-            model_id = line.split(":", 1)[1].strip()
-            break
-
-    return model_id, body
+    return path.read_text().strip()
 
 
 def _resolve_narrative(test_input: dict, uc1_dir: Path) -> str:
@@ -70,6 +55,7 @@ def _resolve_narrative(test_input: dict, uc1_dir: Path) -> str:
 
 def run_prompt_a_test(
     client: "BedrockRuntimeClient",
+    model_id: str,
     test_case_path: Path,
     prompt_version: str = "v01",
 ) -> dict:
@@ -77,6 +63,7 @@ def run_prompt_a_test(
     Function 2: Run a single Prompt A test case.
 
     :param client: Bedrock runtime client.
+    :param model_id: Bedrock model ID to use.
     :param test_case_path: Path to a test input TOML file (benign or adversarial).
     :param prompt_version: Which prompt version to use (default "v01").
     :return: Dict with test metadata and the LLM extraction result.
@@ -92,7 +79,7 @@ def run_prompt_a_test(
     narrative = _resolve_narrative(test_input, uc1_dir)
 
     # Load prompt template
-    model_id, prompt_template = _load_prompt_template(prompt_dir, prompt_version)
+    prompt_template = _load_prompt_template(prompt_dir, prompt_version)
 
     # Call Function 1
     result = extract_fnol_fields(client, model_id, prompt_template, narrative)

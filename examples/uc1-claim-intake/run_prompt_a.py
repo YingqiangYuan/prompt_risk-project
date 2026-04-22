@@ -10,11 +10,11 @@ Usage::
 
 import json
 
-import boto3
-
 from prompt_risk.paths import path_enum
 from prompt_risk.uc.uc1.testing import run_prompt_a_test
 from prompt_risk.one.api import one
+
+MODEL_ID = "us.amazon.nova-2-lite-v1:0"
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
     print("=" * 60)
     print(f"Running benign test: {benign_path.name}")
     print("=" * 60)
-    result = run_prompt_a_test(client, benign_path)
+    result = run_prompt_a_test(client, MODEL_ID, benign_path)
     print(json.dumps(result, indent=2))
 
     # --- Run an adversarial test case ---
@@ -36,7 +36,7 @@ def main():
     print("=" * 60)
     print(f"Running adversarial test: {adversarial_path.name}")
     print("=" * 60)
-    result = run_prompt_a_test(client, adversarial_path)
+    result = run_prompt_a_test(client, MODEL_ID, adversarial_path)
     print(json.dumps(result, indent=2))
 
 
