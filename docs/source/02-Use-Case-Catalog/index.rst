@@ -1,7 +1,7 @@
 .. _use-case-catalog:
 
 Use Case Catalog: AI Applications with Prompt Exposure in Insurance
-====================================================================
+==============================================================================
 
 .. list-table::
    :widths: 20 80
@@ -16,8 +16,7 @@ Use Case Catalog: AI Applications with Prompt Exposure in Insurance
 ----
 
 Overview
---------
-
+------------------------------------------------------------------------------
 A large-scale insurance company operates AI-powered applications across its value chain — from policy quoting and underwriting to claims handling, legal review, and customer engagement. These applications vary significantly in their **architecture** (single-turn vs. multi-step orchestration, retrieval-augmented vs. tool-augmented), **autonomy level** (human-in-the-loop vs. fully autonomous), and **exposure surface** (internal-only vs. customer-facing, static data vs. live external data).
 
 To systematically analyze prompt-level risks, we define six use cases that collectively cover the spectrum of LLM integration patterns found in insurance operations. Each use case is grounded in a specific business function and describes:
@@ -72,20 +71,18 @@ The six use cases are ordered by increasing architectural complexity:
 ----
 
 Use Case 1: Multi-Step Claim Intake Processing
------------------------------------------------
+------------------------------------------------------------------------------
 
 **Pattern:** LLM Orchestration — Chained Multi-Step Pipeline
 
 Business Context
-^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When a policyholder reports a loss (First Notice of Loss — FNOL), the incoming information arrives in unstructured form: a phone transcript, a web form narrative, uploaded photos, and supporting documents. Before a human adjuster can begin working the claim, this raw input must be transformed into a structured claim record — categorized by line of business, assessed for severity, checked for coverage applicability, and routed to the appropriate handling team.
 
 This application automates the FNOL intake pipeline. It is used by **internal claims staff** who review and approve the structured output before it enters the claims management system.
 
 Architecture
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The application is a **deterministic multi-step LLM pipeline** — a fixed sequence of LLM calls where the output of each step feeds into the next. There is no autonomous decision-making; the orchestration logic is hardcoded in application code. Each step calls the LLM with a different prompt tailored to a specific subtask.
 
 - **Step 1: Information Extraction** — Prompt A parses raw FNOL narrative into structured fields
@@ -98,7 +95,7 @@ The application is a **deterministic multi-step LLM pipeline** — a fixed seque
 Each step's output feeds directly into the next step's input, forming a linear chain.
 
 Prompt Inventory
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -130,7 +127,7 @@ Prompt Inventory
      - **Accumulated chain risk** — this prompt consumes all upstream outputs, meaning any injection or corruption from Steps 1–4 culminates here and shapes the final recommendation seen by human reviewers
 
 Key Characteristics
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Fixed orchestration** — No LLM autonomy; the pipeline sequence is determined by application code.
 - **Prompt chaining risk** — Errors or injections in early steps propagate and amplify through downstream prompts.
@@ -140,20 +137,18 @@ Key Characteristics
 ----
 
 Use Case 2: Underwriting Knowledge Assistant
----------------------------------------------
+------------------------------------------------------------------------------
 
 **Pattern:** Retrieval-Augmented Generation (RAG) over Internal Knowledge Base
 
 Business Context
-^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Insurance underwriting requires deep expertise across product lines — commercial property, general liability, professional liability, marine, cyber, and more. Underwriters must constantly reference internal guidelines, appetite documents, rate filings, reinsurance treaties, and regulatory bulletins. Historically, this knowledge is scattered across SharePoint sites, PDF manuals, and tribal expertise.
 
 This application provides underwriters with a **conversational knowledge assistant** that answers questions by retrieving relevant content from an internal knowledge base and synthesizing a response. It is used by **internal underwriters** during the quoting and risk evaluation process.
 
 Architecture
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The application follows the standard **RAG pattern**:
 
 - **Step 1: Query Processing** — Prompt F rewrites the underwriter's question into an optimized retrieval query
@@ -162,7 +157,7 @@ The application follows the standard **RAG pattern**:
 - **Output** — Answer with source citations delivered to the underwriter
 
 Prompt Inventory
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -182,7 +177,7 @@ Prompt Inventory
      - **Indirect prompt injection via knowledge base** — if any indexed document contains adversarial content (planted or accidentally ingested), it enters the LLM context through retrieval and can override system instructions; also risks **sensitive data leakage** if the prompt fails to restrict verbatim quoting of proprietary underwriting guidelines, pricing logic, or reinsurance terms
 
 Key Characteristics
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Knowledge base as attack surface** — If any indexed document contains adversarial content (whether planted or accidentally ingested), it enters the LLM context via retrieval, creating an **indirect prompt injection** vector.
 - **Sensitive internal content** — Retrieved passages may contain proprietary underwriting guidelines, pricing logic, risk appetite thresholds, or reinsurance terms. The RAG System Prompt must enforce boundaries on what the model can quote verbatim vs. summarize.
@@ -192,20 +187,18 @@ Key Characteristics
 ----
 
 Use Case 3: Commercial Client Risk Profiling Agent
----------------------------------------------------
+------------------------------------------------------------------------------
 
 **Pattern:** Web-Fetch Research Agent with External Data Gathering
 
 Business Context
-^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When underwriting a new commercial insurance policy — whether for a manufacturing plant, a restaurant chain, a construction contractor, or a technology company — underwriters need to assess the prospective client's risk profile beyond what the application form provides. This includes the company's financial health, litigation history, regulatory violations, safety records, news coverage, customer complaints, and industry-specific risk factors.
 
 Traditionally, underwriters manually search public databases, news sites, court records, and regulatory filings. This application automates that process: given a prospective commercial client's identity, the agent autonomously searches the open web to gather publicly available information and produces a **structured risk assessment report**. It is used by **internal underwriters** during the pre-bind evaluation of commercial accounts.
 
 Architecture
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The agent operates in a **research loop** tailored to risk assessment:
 
 - **Step 1: Research Planning** — Prompt H analyzes the client profile (company name, industry, location, requested coverage) and generates a targeted search plan covering relevant risk dimensions (financial, legal, regulatory, operational, reputational)
@@ -216,7 +209,7 @@ The agent operates in a **research loop** tailored to risk assessment:
 - **Output** — Structured Risk Assessment Report sent to underwriter review
 
 Prompt Inventory
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -244,7 +237,7 @@ Prompt Inventory
      - **Biased synthesis** — the prompt must reconcile potentially contradictory signals from multiple external sources; injection-influenced intermediate findings could skew the final risk rating, directly affecting underwriting decisions and pricing
 
 Key Characteristics
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Uncontrolled external content** — The agent fetches arbitrary web pages, making every fetched page a potential **indirect prompt injection** vector. A company seeking favorable insurance terms could manipulate its public web presence to influence the AI's risk assessment.
 - **Iterative autonomy** — The agent decides how many searches to conduct and when to stop, introducing a feedback loop where early-stage injection could steer subsequent search behavior.
@@ -254,20 +247,18 @@ Key Characteristics
 ----
 
 Use Case 4: Litigation Support Agent
--------------------------------------
+------------------------------------------------------------------------------
 
 **Pattern:** Autonomous Agent with Basic Tool Access
 
 Business Context
-^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Insurance and litigation are inseparable. When liability claims are disputed, injury claims escalate, or coverage disagreements arise, claims move into litigation — and insurers become direct participants. An insurer's claims legal team manages thousands of litigated cases simultaneously, each involving large volumes of documents: pleadings, depositions, medical records, expert reports, settlement demands, and years of correspondence. Efficient case analysis directly impacts litigation outcomes and reserve accuracy, making it a core insurance function.
 
 This application is a **litigation support agent** that helps internal claims attorneys analyze litigated claim files. Given a legal question or task — such as "summarize the liability exposure in this case" or "identify all medical treatment gaps in the claimant's records" — it autonomously plans an approach, reads relevant documents from the case file, and produces structured analysis. It has access to a small set of **read-only tools** for navigating the document repository. It is used by **internal claims legal staff**.
 
 Architecture
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The agent follows an **autonomous plan-and-execute loop** with access to basic read-only tools. Unlike Use Case 3 (which fetches external web content), this agent works exclusively with internal case documents accessed through controlled tool interfaces.
 
 - **Step 1: Task Planning** — Prompt L analyzes the attorney's question and creates a step-by-step investigation plan (which documents to review, what to look for)
@@ -280,7 +271,7 @@ The agent follows an **autonomous plan-and-execute loop** with access to basic r
 - **Output** — Structured Legal Analysis sent to attorney review
 
 Prompt Inventory
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -304,7 +295,7 @@ Prompt Inventory
      - **Biased output** — if the agent's investigation was steered by document-borne injection, the synthesis will reflect that bias, potentially leading to inaccurate liability assessments or flawed settlement recommendations with direct financial consequences
 
 Key Characteristics
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Read-only tool access** — The agent can search and read documents but cannot modify, delete, or transmit anything. This limits the blast radius of any prompt-related failure to **information output quality**.
 - **Internal repository, external-origin content** — The document repository is internal and managed, but many documents within it originate from external parties (opposing counsel pleadings, claimant statements, third-party medical records). This creates a subtle but real injection surface.
@@ -314,20 +305,18 @@ Key Characteristics
 ----
 
 Use Case 5: Claims Automation Agent
-------------------------------------
+------------------------------------------------------------------------------
 
 **Pattern:** Advanced Autonomous Agent with Privileged Tool Access
 
 Business Context
-^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For high-volume, lower-complexity claims (e.g., auto glass replacement, minor property damage, straightforward medical payments), insurers seek to automate end-to-end processing — from intake through investigation to resolution — with minimal human intervention. This reduces cycle time, improves customer experience, and frees adjusters to focus on complex claims.
 
 This application is an **advanced claims automation agent** that can autonomously investigate a claim and take actions in enterprise systems. Unlike Use Case 4 (read-only tools), this agent has **write access to production systems** and can trigger real-world business outcomes. It operates as a **system-level automated process** with human oversight at defined checkpoints.
 
 Architecture
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The agent operates with a **rich tool set** that includes both read and write capabilities across multiple enterprise systems. It follows an autonomous plan-execute-verify loop with escalation logic.
 
 - **Step 1: Claim Assessment & Planning** — Prompt O (the master system prompt) defines the agent's identity, authority boundaries, escalation rules, and compliance constraints. The agent reviews the incoming claim and formulates an investigation plan.
@@ -342,7 +331,7 @@ The agent operates with a **rich tool set** that includes both read and write ca
 - **Output** — Claim resolved or escalated, with full audit log.
 
 Prompt Inventory
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -366,7 +355,7 @@ Prompt Inventory
      - **Compliance risk** — if upstream reasoning was influenced by injection or the system prompt has authorization gaps, this prompt will generate documentation that rationalizes a flawed decision, creating a misleading audit trail that could fail regulatory scrutiny
 
 Key Characteristics (Contrast with Use Case 4)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -402,20 +391,18 @@ Key Characteristics (Contrast with Use Case 4)
 ----
 
 Use Case 6: Policyholder Self-Service AI
------------------------------------------
+------------------------------------------------------------------------------
 
 **Pattern:** Customer-Facing Conversational Agent
 
 Business Context
-^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Policyholders interact with their insurer for a wide range of needs: checking policy details, filing claims, requesting certificates of insurance, understanding coverage, updating personal information, and asking billing questions. Traditionally these interactions flow through call centers, web portals, or local agents.
 
 This application is a **customer-facing AI agent** embedded in the insurer's website, mobile app, and messaging channels. It is the first point of contact for **external policyholders** — the general public — and must handle a vast range of intents while maintaining strict brand, compliance, and security standards.
 
 Architecture
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The agent operates as a **multi-turn conversational system** with access to customer-specific data via authenticated API calls. It combines intent classification, data retrieval, and response generation in a controlled dialogue flow.
 
 - **Step 1: Intent Classification & Safety Screening** — Prompt R classifies the customer's message and performs initial safety checks
@@ -425,7 +412,7 @@ The agent operates as a **multi-turn conversational system** with access to cust
 - **Output** — Filtered response delivered to the policyholder
 
 Prompt Inventory
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -449,7 +436,7 @@ Prompt Inventory
      - **Guard bypass / false sense of security** — the output guard is itself a prompt that can be influenced; if the adversarial content is crafted to appear benign at the output-review stage (e.g., leaking information through subtle phrasing rather than explicit statements), the guard may pass it through; also introduces its own prompt leakage risk
 
 Key Characteristics
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Untrusted user input** — Every message comes from an external user with unknown intent. This is the **highest direct prompt injection exposure** of all six use cases.
 - **Brand and compliance stakes** — Every response is delivered under the company's brand. Inappropriate, inaccurate, or manipulated responses directly impact customer trust and regulatory standing.
@@ -461,7 +448,7 @@ Key Characteristics
 ----
 
 Cross-Use-Case Comparison
---------------------------
+------------------------------------------------------------------------------
 
 .. list-table::
    :header-rows: 1
@@ -520,8 +507,7 @@ Cross-Use-Case Comparison
 ----
 
 Next Steps
-----------
-
+------------------------------------------------------------------------------
 Each use case will be expanded into a dedicated document covering:
 
 1. Detailed prompt specifications (purpose, structure, constraints)

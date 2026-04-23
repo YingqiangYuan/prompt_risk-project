@@ -1,7 +1,7 @@
 .. _judge-catalog:
 
 Judge Catalog: LLM-as-Judge Security Evaluation Pipeline
-=========================================================
+==============================================================================
 
 .. list-table::
    :widths: 20 80
@@ -16,15 +16,13 @@ Judge Catalog: LLM-as-Judge Security Evaluation Pipeline
 ----
 
 Overview
---------
-
+------------------------------------------------------------------------------
 A **Judge** is an LLM prompt that evaluates another LLM prompt for security risks. Judges are organized into a three-layer pipeline: a deterministic rule engine for high-confidence pattern matching, specialized LLM judges for semantic analysis, and a meta-judge for aggregation and final risk rating.
 
 The pipeline processes a **Prompt Submission Package** — the target prompt plus deployment context — and produces a structured **Risk Report**.
 
 Pipeline Architecture
-^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: text
 
    Input: Prompt Submission Package
@@ -57,8 +55,7 @@ Pipeline Architecture
    Output: Risk Report (structured)
 
 Prompt Submission Package
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Every evaluation takes as input not just the prompt text, but a standardized package of deployment context:
 
 .. list-table::
@@ -92,13 +89,12 @@ The ``deployment_type`` field significantly affects risk weighting: the same ove
 ----
 
 Layer 1: Rule Engine (Deterministic)
--------------------------------------
+------------------------------------------------------------------------------
 
 This layer uses **no LLM**. It applies deterministic pattern matching for two categories of risk with unambiguous signatures. It is fast, cheap, and fully explainable — the first gate in the pipeline.
 
 R1 — Secrets Scanner
-^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk Category:** Hardcoded Sensitive Data
 
 Detects sensitive information embedded in prompt text via regex patterns:
@@ -121,8 +117,7 @@ Detects sensitive information embedded in prompt text via regex patterns:
 **Trigger behavior:** Any match immediately escalates the finding to Critical severity. The pipeline does not wait for Layer 2 judges to complete.
 
 R2 — Keyword Blocklist Detector
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk Category:** Over-Permissive Authorization (keyword-level)
 
 Scans for high-risk phrases that signal unconditional compliance or suppressed refusal:
@@ -143,15 +138,13 @@ Scans for high-risk phrases that signal unconditional compliance or suppressed r
 ----
 
 Layer 2: Specialized LLM Judges
----------------------------------
-
+------------------------------------------------------------------------------
 Five judges run in parallel, each focused on a single security topic. Parallel execution isolates reasoning load — a judge analyzing instruction conflicts does not compete for attention with one analyzing role confusion.
 
 Each judge is itself a versioned prompt stored under ``data/judges/prompts/`` (see Document 04 for directory structure). Each judge outputs structured findings per criterion, following a common schema (see Document 06 for output format and execution details).
 
 Judge Summary Table
-^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. list-table::
    :header-rows: 1
    :widths: 10 30 30 30
@@ -184,8 +177,7 @@ Judge Summary Table
 ----
 
 J1 — Over-Permissive Authorization Judge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk category:** Risk 1 — Over-Permissive Authorization
 
 **Status:** Implemented (``data/judges/prompts/j1-over-permissive/``)
@@ -222,8 +214,7 @@ J1 — Over-Permissive Authorization Judge
 ----
 
 J2 — Hardcoded Sensitive Data Judge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk category:** Risk 2 — Hardcoded Sensitive Data
 
 **Status:** Planned
@@ -242,8 +233,7 @@ J2 complements R1 (Secrets Scanner): R1 catches structured patterns (API keys, c
 ----
 
 J3 — Role Confusion Judge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk category:** Risk 3 — Role Confusion
 
 **Status:** Planned
@@ -272,8 +262,7 @@ J3 — Role Confusion Judge
 ----
 
 J4 — Instruction Conflict Judge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk category:** Risk 4 — Instruction Conflict
 
 **Status:** Planned
@@ -300,8 +289,7 @@ J4 — Instruction Conflict Judge
 ----
 
 J5 — Logic Ambiguity Judge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Risk category:** Risk 5 — Logic Ambiguity
 
 **Status:** Planned
@@ -317,13 +305,11 @@ J5 — Logic Ambiguity Judge
 ----
 
 Layer 3: Meta-Judge (Aggregation)
-----------------------------------
-
+------------------------------------------------------------------------------
 The Meta-Judge receives all outputs from Layer 1 and Layer 2 and performs two tasks: **weighted risk aggregation** and **risk report generation**.
 
 Deployment Scenario Weighting
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The final risk level is not simply the highest individual finding. It is adjusted by a **deployment scenario weight** that reflects the real-world impact amplification of different architectures:
 
 .. list-table::
@@ -346,8 +332,7 @@ The final risk level is not simply the highest individual finding. It is adjuste
 The same risk finding in an Agentic Executor context may be several times more dangerous than in a One-shot Query context.
 
 Risk Report Structure
-^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Meta-Judge produces a structured Risk Report:
 
 .. code-block:: text
@@ -385,8 +370,7 @@ The Meta-Judge produces a structured Risk Report:
 ----
 
 Judge Quality Metrics
-----------------------
-
+------------------------------------------------------------------------------
 Judges are themselves prompts — and prompts can be unreliable. The following metrics are tracked to ensure judge trustworthiness:
 
 .. list-table::
@@ -414,8 +398,7 @@ Judge quality assurance methodology (known-answer testing, cross-version compari
 ----
 
 Cross-Reference to Use Cases
-------------------------------
-
+------------------------------------------------------------------------------
 Each judge applies across all six use cases defined in Document 02, but the relevance and severity weighting varies by use case architecture:
 
 .. list-table::
@@ -482,8 +465,7 @@ Each judge applies across all six use cases defined in Document 02, but the rele
 ----
 
 Next Steps
-----------
-
+------------------------------------------------------------------------------
 Each judge will be expanded with:
 
 1. Full prompt specifications (system prompt + user prompt templates) — Document 04 (data structure)

@@ -1,8 +1,7 @@
 .. _data-structure-design:
 
 Data Structure Design: Prompt & Test Data Organization
-=======================================================
-
+==============================================================================
 .. list-table::
    :widths: 20 80
 
@@ -16,8 +15,7 @@ Data Structure Design: Prompt & Test Data Organization
 ----
 
 Design Principles
------------------
-
+------------------------------------------------------------------------------
 1. **TOML for structured test data** — TOML's native multiline string support (``"""..."""``) makes it ideal for storing narrative text alongside structured metadata. Python 3.11+ includes ``tomllib`` in the standard library; no external dependency needed.
 
 2. **Jinja for prompt templates** — Prompt files use ``.jinja`` extension for template rendering. System prompt and user prompt are stored as separate files to mirror the Bedrock Converse API's ``system`` / ``messages`` separation, enabling prompt caching on the system prompt.
@@ -35,8 +33,7 @@ Design Principles
 ----
 
 Top-Level Directory Structure
-------------------------------
-
+------------------------------------------------------------------------------
 The ``data/`` directory has two top-level branches: **use-case prompts** (``uc*``) and **judge prompts** (``judges/``).
 
 .. code-block:: text
@@ -73,11 +70,10 @@ The ``data/`` directory has two top-level branches: **use-case prompts** (``uc*`
 ----
 
 Use-Case Prompt Structure
---------------------------
+------------------------------------------------------------------------------
 
 General Layout
-^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Each use-case prompt follows the same internal structure: versioned prompt files plus test data.
 
 .. code-block:: text
@@ -113,8 +109,7 @@ Each use-case prompt follows the same internal structure: versioned prompt files
            ...
 
 Naming Conventions
-^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. list-table::
    :header-rows: 1
    :widths: 30 35 35
@@ -150,11 +145,10 @@ Naming Conventions
 ----
 
 Judge Prompt Structure
------------------------
+------------------------------------------------------------------------------
 
 General Layout
-^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Judge prompts live under ``data/judges/prompts/`` and follow the **same three-file convention** as use-case prompts. The key difference is in **what the templates receive as input**: judge prompts take target prompt text as Jinja variables, rather than business data like FNOL narratives.
 
 .. code-block:: text
@@ -180,8 +174,7 @@ Judge prompts live under ``data/judges/prompts/`` and follow the **same three-fi
            versions/01/...
 
 Naming Conventions
-^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. list-table::
    :header-rows: 1
    :widths: 30 35 35
@@ -206,8 +199,7 @@ Naming Conventions
      - —
 
 How Judge Prompts Differ from UC Prompts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Although the file structure is identical, the content and data flow differ:
 
 .. list-table::
@@ -231,8 +223,7 @@ Although the file structure is identical, the content and data flow differ:
      - No local test data; judges are tested by running them against UC prompts with **known-answer expectations** (see Document 06)
 
 Judge metadata.toml Example (J1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: toml
 
    description = "Evaluates a prompt for over-permissive authorization risks"
@@ -240,8 +231,7 @@ Judge metadata.toml Example (J1)
    date = 2026-04-23
 
 Judge user-prompt.jinja Input Variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The judge's user prompt template accepts the target prompt under review as input. The key variables are:
 
 .. list-table::
@@ -260,11 +250,10 @@ The judge's user prompt conditionally renders Part 1 (system prompt) and Part 2 
 ----
 
 File Format Specifications
----------------------------
+------------------------------------------------------------------------------
 
 Prompt Files
-^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Each prompt version — whether UC or judge — is a directory containing three files:
 
 **system-prompt.jinja** — The system prompt sent via Bedrock Converse API's ``system`` parameter. This is fixed per request and benefits from prompt caching.
@@ -292,8 +281,7 @@ Each prompt version — whether UC or judge — is a directory containing three 
    date = 2026-04-22
 
 Normal Test Input (``p1-extraction/normal/b-01-auto-rear-end.toml``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: toml
 
    [meta]
@@ -316,8 +304,7 @@ Normal Test Input (``p1-extraction/normal/b-01-auto-rear-end.toml``)
    """
 
 Attack Test Input (``p1-extraction/attack/a-01-injection-in-narrative.toml``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: toml
 
    [meta]
@@ -345,45 +332,39 @@ Attack Test Input (``p1-extraction/attack/a-01-injection-in-narrative.toml``)
 ----
 
 Use-Case-Specific Schema Notes
---------------------------------
-
+------------------------------------------------------------------------------
 Each use case may extend or adapt the base file conventions to fit its architecture. Below are brief notes on how other use cases differ from the UC1 pipeline pattern.
 
 UC2 — Underwriting RAG
-^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Test inputs store user queries, not raw narratives
 - Adds a ``knowledge-base/`` directory containing document chunks (the indexed content)
 
   - Includes both clean and poisoned document variants for testing indirect injection via retrieval
 
 UC3 — Commercial Client Risk Profiling
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Test inputs store client profile information (company name, industry, location, coverage request)
 - Adds a ``mock-web-pages/`` directory containing simulated web page content (news articles, court records, regulatory filings)
 
   - Includes both clean pages and pages with embedded adversarial content
 
 UC4 — Litigation Support Agent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Test inputs store attorney questions/tasks
 - Adds a ``mock-case-files/`` directory containing simulated documents (pleadings, medical records, etc.)
 
   - Includes documents with embedded adversarial content (e.g., opposing counsel filings with hidden instructions)
 
 UC5 — Claims Automation Agent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Test inputs store incoming claim assignments
 - Adds ``mock-tool-responses/`` for simulating responses from enterprise systems (policy DB, fraud detection, vendor APIs)
 
   - Includes both clean and adversarial vendor responses
 
 UC6 — Policyholder Self-Service AI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Test inputs store customer messages (single-turn and multi-turn conversation sequences)
 - Adds ``mock-policy-data/`` for simulated API responses (policy details, claim status, billing info)
 - Multi-turn attack cases are stored as conversation arrays with escalating manipulation attempts
@@ -392,7 +373,6 @@ UC6 — Policyholder Self-Service AI
 
 Summary
 -------
-
 .. list-table::
    :header-rows: 1
    :widths: 35 65
