@@ -15,6 +15,7 @@ class PathEnum:
     absolute paths to eliminate current directory dependencies and ensure consistent path
     resolution across different execution contexts and DevOps workflows.
     """
+
     @cached_property
     def dir_home(self):
         return Path.home()
@@ -55,7 +56,6 @@ class PathEnum:
 
     # Data
     dir_data = dir_project_root / "data"
-    dir_data_uc1 = dir_data / "uc1-claim-intake"
 
 
 path_enum = PathEnum()

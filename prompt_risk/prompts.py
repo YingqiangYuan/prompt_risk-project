@@ -6,7 +6,7 @@ from functools import cached_property
 
 import jinja2
 
-from .paths import path_enum
+from .constants import PromptIdEnum
 
 
 @dataclasses.dataclass
@@ -28,9 +28,9 @@ class Prompt:
             version=version,
         )
 
-    @property
-    def use_case_id(self) -> str:
-        return self.id.split(":", 1)[0]
+    @cached_property
+    def enum_obj(self) -> PromptIdEnum:
+        return PromptIdEnum(self.id)
 
     @property
     def short_name(self) -> str:
@@ -38,9 +38,7 @@ class Prompt:
 
     @cached_property
     def path(self) -> Path:
-        return path_enum.dir_data.joinpath(
-            self.use_case_id, "prompts", self.short_name, "versions", self.version
-        )
+        return self.enum_obj.dir_root.joinpath("versions", self.version)
 
     @cached_property
     def path_system_prompt(self) -> Path:
