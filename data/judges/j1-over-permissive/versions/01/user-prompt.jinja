@@ -1,0 +1,23 @@
+Evaluate the following production prompt for over-permissive authorization risks.
+
+## TARGET PROMPT UNDER REVIEW
+
+The target prompt consists of two parts: a System Prompt (static instructions to the LLM) and a User Prompt Template (the per-request template that injects runtime data into the LLM context). Both are shown below exactly as authored.
+
+### Part 1: Target System Prompt
+
+This is the static system-level instruction given to the LLM. It defines the model's role, behavior boundaries, and constraints.
+
+```
+{{ data.target_system_prompt }}
+```
+
+### Part 2: Target User Prompt Template
+
+This is the per-request template that carries runtime data into the LLM context. Variables in double curly braces (e.g. {{ "{{" }} data.xxx {{ "}}" }}) are placeholders that get filled with actual data at runtime — often from external, untrusted sources such as customer-submitted text.
+
+Review this template to understand what data enters the LLM context and whether the System Prompt above provides adequate guardrails for that data exposure.
+
+```
+{{ data.target_user_prompt_template }}
+```
