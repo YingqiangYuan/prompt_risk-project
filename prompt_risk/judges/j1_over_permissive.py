@@ -114,6 +114,7 @@ def run_j1_over_permissive(
 
     for attempt in range(MAX_RETRIES):
         text = converse(client, model_id, system, messages)
+        json_obj = extract_json(text)
         try:
             return J1Result(**json_obj)
         except (json.JSONDecodeError, ValidationError) as exc:
