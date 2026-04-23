@@ -17,32 +17,27 @@ prompt files and calling this function.
 import typing as T
 import json
 import re
-from pathlib import Path
 
 from pydantic import BaseModel, Field, ValidationError
 
+from ..constants import PromptIdEnum
+from ..prompts import Prompt
 from ..bedrock_utils import converse
 
 if T.TYPE_CHECKING:
     from mypy_boto3_bedrock_runtime import BedrockRuntimeClient
 
-import jinja2
 
 # ---------------------------------------------------------------------------
-# Paths — judge prompt templates live under data/judges/j1-over-permissive/
+# Input / Output models
 # ---------------------------------------------------------------------------
-_DIR_DATA = Path(__file__).absolute().parent.parent.parent / "data"
-_DIR_J1 = _DIR_DATA / "judges" / "j1-over-permissive"
+class J1UserPromptData(BaseModel):
+    """Input data for the J1 judge user prompt template."""
+
+    target_system_prompt: str
+    target_user_prompt_template: str
 
 
-def _load_judge_template(version: str, filename: str) -> jinja2.Template:
-    path = _DIR_J1 / "versions" / version / filename
-    return jinja2.Template(path.read_text(encoding="utf-8"))
-
-
-# ---------------------------------------------------------------------------
-# Output models
-# ---------------------------------------------------------------------------
 T_SEVERITY = T.Literal["major", "minor", "pass"]
 T_OVERALL_RISK = T.Literal["critical", "high", "medium", "low", "pass"]
 
@@ -83,8 +78,7 @@ def _extract_json(text: str) -> str:
 # ---------------------------------------------------------------------------
 def run_j1_over_permissive(
     client: "BedrockRuntimeClient",
-    target_system_prompt: str,
-    target_user_prompt_template: str,
+    data: J1UserPromptData,
     judge_version: str = "01",
     model_id: str = "us.amazon.nova-2-lite-v1:0",
 ) -> J1Result:
@@ -94,11 +88,8 @@ def run_j1_over_permissive(
     ----------
     client:
         Bedrock Runtime client.
-    target_system_prompt:
-        The full text of the system prompt being evaluated.
-    target_user_prompt_template:
-        The full text of the user prompt template being evaluated
-        (with Jinja placeholders still present).
+    data:
+        The target prompt texts to evaluate.
     judge_version:
         Which version of the J1 judge prompt to use.
     model_id:
@@ -110,20 +101,17 @@ def run_j1_over_permissive(
         Structured evaluation result with overall risk, score, findings,
         and summary.
     """
-    judge_system_template = _load_judge_template(judge_version, "system-prompt.jinja")
-    judge_user_template = _load_judge_template(judge_version, "user-prompt.jinja")
+    judge_prompt = Prompt(
+        id=PromptIdEnum.JUDGE_J1_OVER_PERMISSIVE.value,
+        version=judge_version,
+    )
 
     system = [
-        {"text": judge_system_template.render()},
+        {"text": judge_prompt.system_prompt_template.render()},
         {"cachePoint": {"type": "default"}},
     ]
 
-    # Build a simple namespace so the template can use {{ data.xxx }}
-    data = {
-        "target_system_prompt": target_system_prompt,
-        "target_user_prompt_template": target_user_prompt_template,
-    }
-    user_prompt = judge_user_template.render(data=data)
+    user_prompt = judge_prompt.user_prompt_template.render(data=data)
 
     messages: list[dict] = [
         {"role": "user", "content": [{"text": user_prompt}]},
