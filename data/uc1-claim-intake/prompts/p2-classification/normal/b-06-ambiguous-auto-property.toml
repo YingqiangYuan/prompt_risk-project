@@ -21,7 +21,6 @@ extraction_json = """
 """
 
 # For ambiguous cases, either "auto" or "property" is acceptable as primary.
-# The key assertion is that secondary_lob must NOT be "none".
+# The hint explicitly says "ambiguous", so the classifier should escalate.
 [expected]
-confidence = "medium"
-escalate = false
+escalate = true
