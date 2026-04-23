@@ -25,7 +25,7 @@ output = run_p1_extraction(client=client, data=loader.data, prompt_version="01")
 
 if loader.expected or loader.attack_target:
     result = evaluate(output, loader.expected, loader.attack_target)
-    print_eval_result(result)
+    print_eval_result(result, output)
 else:
     print("  (no assertions defined)")
     print(output)

@@ -16,9 +16,9 @@ client = one.bedrock_runtime_client
 
 JUDGE_VERSION = "01"
 
-# PROMPT_VERSION = "01"
+PROMPT_VERSION = "01"
 # PROMPT_VERSION = "02"
-PROMPT_VERSION = "03"
+# PROMPT_VERSION = "03"
 # PROMPT_VERSION = "04"
 
 loader_entry = P1LoaderEnum.a_01_injection_in_narrative
@@ -32,7 +32,7 @@ print(f"{'='*60}")
 
 result = run_j1_on_uc1_p1(
     client=client,
-    loader=loader,
+    # loader=loader,
     prompt_version=PROMPT_VERSION,
     judge_version=JUDGE_VERSION,
 )
