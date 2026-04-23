@@ -1,6 +1,6 @@
 
-.. image:: https://readthedocs.org/projects/prompt-risk/badge/?version=latest
-    :target: https://prompt-risk.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/yq-prompt-risk/badge/?version=latest
+    :target: https://yq-prompt-risk.readthedocs.io/en/latest/
     :alt: Documentation Status
 
 .. image:: https://github.com/YingqiangYuan/prompt_risk-project/actions/workflows/main.yml/badge.svg
@@ -9,13 +9,13 @@
 .. image:: https://codecov.io/gh/YingqiangYuan/prompt_risk-project/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/YingqiangYuan/prompt_risk-project
 
-.. image:: https://img.shields.io/pypi/v/prompt-risk.svg
+.. .. image:: https://img.shields.io/pypi/v/prompt-risk.svg
     :target: https://pypi.python.org/pypi/prompt-risk
 
-.. image:: https://img.shields.io/pypi/l/prompt-risk.svg
+.. .. image:: https://img.shields.io/pypi/l/prompt-risk.svg
     :target: https://pypi.python.org/pypi/prompt-risk
 
-.. image:: https://img.shields.io/pypi/pyversions/prompt-risk.svg
+.. .. image:: https://img.shields.io/pypi/pyversions/prompt-risk.svg
     :target: https://pypi.python.org/pypi/prompt-risk
 
 .. image:: https://img.shields.io/badge/✍️_Release_History!--None.svg?style=social&logo=github
@@ -26,10 +26,10 @@
 
 ------
 
-.. image:: https://img.shields.io/badge/Link-API-blue.svg
+.. .. image:: https://img.shields.io/badge/Link-API-blue.svg
     :target: https://prompt-risk.readthedocs.io/en/latest/py-modindex.html
 
-.. image:: https://img.shields.io/badge/Link-Install-blue.svg
+.. .. image:: https://img.shields.io/badge/Link-Install-blue.svg
     :target: `install`_
 
 .. image:: https://img.shields.io/badge/Link-GitHub-blue.svg
@@ -47,8 +47,8 @@
 
 Welcome to ``prompt_risk`` Documentation
 ==============================================================================
-.. image:: https://prompt-risk.readthedocs.io/en/latest/_static/prompt_risk-logo.png
-    :target: https://prompt-risk.readthedocs.io/en/latest/
+.. image:: https://yq-prompt-risk.readthedocs.io/en/latest/_static/prompt_risk-logo.png
+    :target: https://yq-prompt-risk.readthedocs.io/en/latest/
 
 Documentation for ``prompt_risk``.
 
