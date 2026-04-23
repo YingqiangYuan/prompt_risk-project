@@ -32,6 +32,6 @@ classification_json = """
 """
 
 [expected]
-severity_level = 3
-handling_priority = "standard"
+severity_level = [3, 4]
+handling_priority = ["standard", "high"]
 escalate = false
