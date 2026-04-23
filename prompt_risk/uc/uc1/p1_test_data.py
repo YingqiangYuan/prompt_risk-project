@@ -8,10 +8,7 @@ from pydantic import BaseModel
 
 from ...constants import PromptIdEnum
 
-
-class P1ExtractionUserPromptData(BaseModel):
-    source: str
-    narrative: str
+from .p1_extraction_runner import P1ExtractionUserPromptData
 
 
 class P1ExtractionUserPromptDataLoader(BaseModel):

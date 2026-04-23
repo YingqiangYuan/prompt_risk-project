@@ -13,13 +13,16 @@ from ...constants import PromptIdEnum
 from ...prompts import Prompt
 from ...bedrock_utils import converse
 
-from .prompt import P1ExtractionUserPromptData
-
 if T.TYPE_CHECKING:
     from mypy_boto3_bedrock_runtime import BedrockRuntimeClient
 
 T_INJURY_INDICATOR = T.Literal["none", "minor", "moderate", "severe", "fatal"]
 T_ESTIMATE_SEVERITY = T.Literal["low", "medium", "high"]
+
+
+class P1ExtractionUserPromptData(BaseModel):
+    source: str
+    narrative: str
 
 
 class P1ExtractionOutput(BaseModel):
