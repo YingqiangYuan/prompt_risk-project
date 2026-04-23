@@ -125,10 +125,10 @@ def run_p1_extraction(
 
     for attempt in range(MAX_RETRIES):
         text = converse(client, model_id, system, messages)
-        json_text = extract_json(text)
+        json_obj = extract_json(text)
 
         try:
-            return P1ExtractionOutput(**json.loads(json_text))
+            return P1ExtractionOutput(**json_obj)
         except (json.JSONDecodeError, ValidationError) as exc:
             if attempt == MAX_RETRIES - 1:
                 raise
