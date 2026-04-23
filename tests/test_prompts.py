@@ -6,7 +6,7 @@ from prompt_risk.constants import PromptIdEnum
 
 def test_read_prompt():
     prompt = Prompt(
-        id=PromptIdEnum.UC1_A_EXTRACTION.value,
+        id=PromptIdEnum.UC1_P1_EXTRACTION.value,
         version="01",
     )
     _ = prompt.system_prompt_template.render()

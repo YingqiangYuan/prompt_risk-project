@@ -12,4 +12,4 @@ class UseCaseIdEnum(enum.StrEnum):
 class PromptIdEnum(enum.StrEnum):
     """Registry of prompt identifiers, formatted as ``{use_case_id}:{short_name}``."""
 
-    UC1_A_EXTRACTION = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE}:p1-extraction"
+    UC1_P1_EXTRACTION = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE}:p1-extraction"
