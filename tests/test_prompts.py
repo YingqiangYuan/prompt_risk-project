@@ -7,9 +7,9 @@ from prompt_risk.constants import PromptIdEnum
 def test_read_prompt():
     prompt = Prompt(
         id=PromptIdEnum.UC1_A_EXTRACTION.value,
-        version=1,
+        version="01",
     )
-    _ = prompt.content
+    _ = prompt.system_prompt_template.render()
 
 
 if __name__ == "__main__":
