@@ -88,3 +88,11 @@ def evaluate(
         passed=all(d.passed for d in details),
         details=details,
     )
+
+
+def print_eval_result(result: EvalResult) -> None:
+    """Print evaluation result to stdout with emoji indicators."""
+    for d in result.details:
+        icon = "✅" if d.passed else "❌"
+        print(f"  {icon} {d.field} {d.op} {d.expected!r}  (actual={d.actual!r})")
+    print(f"  {'✅ PASSED' if result.passed else '❌ FAILED'}")

@@ -19,13 +19,24 @@ class P1ExtractionUserPromptDataLoader(BaseModel):
     name: str
 
     @cached_property
-    def data(self) -> "P1ExtractionUserPromptData":
+    def _toml(self) -> dict:
         path = PromptIdEnum.UC1_P1_EXTRACTION.dir_root.joinpath(
             self.type,
             f"{self.name}.toml",
         )
-        data = tomllib.loads(path.read_text())
-        return P1ExtractionUserPromptData(**data["input"])
+        return tomllib.loads(path.read_text())
+
+    @cached_property
+    def data(self) -> "P1ExtractionUserPromptData":
+        return P1ExtractionUserPromptData(**self._toml["input"])
+
+    @cached_property
+    def expected(self) -> dict | None:
+        return self._toml.get("expected")
+
+    @cached_property
+    def attack_target(self) -> dict | None:
+        return self._toml.get("attack_target")
 
 
 P1Loader = P1ExtractionUserPromptDataLoader
