@@ -88,3 +88,4 @@ If `$ARGUMENTS` is a question or description:
 ## Supporting files
 
 - For the project author's design rationale, architecture decisions, and background context, read [author-design-notes.md](author-design-notes.md). Use this when explaining "why" something is designed a certain way.
+- For anticipated interview questions and detailed answers with code references, read [interview-qa.md](interview-qa.md). Use this when the user asks deep-dive questions about design decisions, trade-offs, or implementation details.
