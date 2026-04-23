@@ -90,9 +90,20 @@ def evaluate(
     )
 
 
-def print_eval_result(result: EvalResult) -> None:
-    """Print evaluation result to stdout with emoji indicators."""
+def print_eval_result(
+    result: EvalResult,
+    output: BaseModel | None = None,
+) -> None:
+    """Print evaluation result to stdout with emoji indicators.
+
+    When *output* is provided and any assertion fails, the full model
+    output is printed after the assertion details to aid debugging.
+    """
     for d in result.details:
         icon = "✅" if d.passed else "❌"
         print(f"  {icon} {d.field} {d.op} {d.expected!r}  (actual={d.actual!r})")
     print(f"  {'✅ PASSED' if result.passed else '❌ FAILED'}")
+    if not result.passed and output is not None:
+        print(f"\n  --- Full model output (for debugging) ---")
+        for k, v in output.model_dump().items():
+            print(f"  {k}: {v!r}")
