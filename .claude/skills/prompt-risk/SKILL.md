@@ -44,9 +44,37 @@ For documentation, read `docs/source/` subdirectories' `index.rst` or `index.md`
 
 The user invoked this skill as: `/prompt-risk $ARGUMENTS`
 
-### Mode 1: No arguments (guided exploration)
+**Routing logic — apply the FIRST matching rule:**
 
-If `$ARGUMENTS` is empty, greet the user and offer a guided tour. Present these exploration paths:
+1. If `$ARGUMENTS` is empty → **Mode Selection** (ask the user to choose)
+2. If `$ARGUMENTS` is a file path, directory name, or module name → **Explore Mode** (interpret as path)
+3. Otherwise → **Explore Mode** (interpret as free-form question)
+
+---
+
+### Mode Selection (no arguments)
+
+If `$ARGUMENTS` is empty, present two modes and ask the user to choose:
+
+> Welcome to the **prompt_risk** project guide! Two modes are available:
+>
+> **1. Explore** — I'll walk you through the codebase interactively. You can follow a guided tour or ask about any file, module, or concept.
+>
+> **2. Quiz** — I'll ask you interview-style questions about the project. After you answer, I'll give feedback based on the reference answer and the actual code.
+>
+> Which mode? (type **1** or **2**, or just describe what you want to know)
+
+If the user picks **1** or says anything exploration-related, enter **Explore Mode**. If the user picks **2** or says anything quiz-related, enter **Quiz Mode**.
+
+---
+
+### Explore Mode
+
+This mode has two sub-paths depending on what the user provides.
+
+#### Guided tour (user picked mode 1 without further input)
+
+Present these exploration paths and ask which interests them:
 
 1. **Architecture overview** — How the pieces fit together (source code structure, data flow, key abstractions)
 2. **Prompt pipeline** — How versioned prompts are loaded, rendered, and executed (UC1 P1→P2→P3 chain)
@@ -55,11 +83,9 @@ If `$ARGUMENTS` is empty, greet the user and offer a guided tour. Present these 
 5. **Running examples** — How to use the `examples/` scripts to see the system in action
 6. **Pick a file or module** — Ask the user what they want to dive into
 
-Ask the user which path interests them, then guide them through it conversationally. After covering one topic, offer to continue with another.
+Guide them through the chosen topic conversationally. After covering one topic, offer to continue with another or switch to Quiz Mode.
 
-### Mode 2: Path argument (file/directory exploration)
-
-If `$ARGUMENTS` looks like a file path, directory name, or module name:
+#### Path exploration (argument is a file/directory/module name)
 
 1. Resolve the path relative to the project root
 2. If it's a directory, list its contents and explain the purpose of each item
@@ -67,14 +93,44 @@ If `$ARGUMENTS` looks like a file path, directory name, or module name:
 4. If the path contains an INDEX.md, read it first for context
 5. Connect what you find to the broader architecture
 
-### Mode 3: Question (free-form inquiry)
-
-If `$ARGUMENTS` is a question or description:
+#### Free-form question (argument is a question or description)
 
 1. Search the codebase for relevant files using Grep and Glob
 2. Read the relevant source code, data files, or documentation
 3. Answer the question with specific code references (file:line format)
 4. Suggest related areas the user might want to explore next
+
+---
+
+### Quiz Mode
+
+This mode uses [interview-qa.md](interview-qa.md) as the question bank (80 questions across 10 categories).
+
+**Flow:**
+
+1. Read `interview-qa.md` to load the full question bank.
+2. Ask the user how they want to be quizzed:
+   - **By category** — pick a category (e.g., "Prompt Engineering", "Judge System"), questions are asked in order within that category
+   - **Random** — questions are drawn from random categories
+   - **Full sequence** — start from Q1 and go through all 80
+3. Present ONE question at a time. Show the question number and category. Do NOT show the reference answer.
+4. Wait for the user to answer.
+5. After the user answers, evaluate their response:
+   - Read the reference answer from `interview-qa.md`
+   - Read the relevant source code files referenced in the answer to verify current accuracy
+   - Compare the user's answer against both the reference answer and the actual code
+   - Provide feedback in this structure:
+     - **Score**: Strong / Adequate / Needs improvement
+     - **What you got right**: Key points the user covered correctly
+     - **What was missing or inaccurate**: Important points from the reference answer that the user missed, or corrections if they said something wrong — cite the specific code path
+     - **Key takeaway**: The single most important insight for this question, in 1-2 sentences
+6. After feedback, ask: "Ready for the next question, or want to switch to Explore Mode to dig into this topic?"
+
+**Rules for Quiz Mode:**
+- NEVER show the reference answer verbatim — paraphrase and add code references
+- If the user says "I don't know" or "skip", give a concise version of the answer (3-4 sentences) with code references, then move on
+- If the user's answer is substantially correct, keep feedback brief — don't repeat what they already know
+- Track which questions have been asked in this session to avoid repeats
 
 ## Interaction style
 
