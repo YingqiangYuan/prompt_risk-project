@@ -36,7 +36,7 @@ class J1UserPromptData(BaseModel):
     """Input data for the J1 judge user prompt template."""
 
     target_system_prompt: str
-    target_user_prompt_template: str
+    target_user_prompt_template: T.Optional[str] = None
 
 
 T_SEVERITY = T.Literal["major", "minor", "pass"]

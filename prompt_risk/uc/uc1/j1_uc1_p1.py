@@ -26,8 +26,8 @@ if T.TYPE_CHECKING:
 
 def run_j1_on_uc1_p1(
     client: "BedrockRuntimeClient",
-    loader: P1ExtractionUserPromptDataLoader,
     prompt_version: str = "01",
+    loader: T.Optional[P1ExtractionUserPromptDataLoader] = None,
     judge_version: str = "01",
     model_id: str = "us.amazon.nova-2-lite-v1:0",
 ) -> J1Result:
@@ -37,11 +37,12 @@ def run_j1_on_uc1_p1(
     ----------
     client:
         Bedrock Runtime client.
-    loader:
-        Test data loader that provides the FNOL narrative to render
-        the user prompt template.
     prompt_version:
         Version of the UC1-P1 prompt to evaluate (e.g. "01", "02").
+    loader:
+        Optional test data loader. When provided, the user prompt template
+        is rendered with real FNOL data. When omitted, the judge evaluates
+        the system prompt only.
     judge_version:
         Version of the J1 judge prompt to use.
     model_id:
@@ -49,11 +50,13 @@ def run_j1_on_uc1_p1(
     """
     prompt = Prompt(id=PromptIdEnum.UC1_P1_EXTRACTION.value, version=prompt_version)
 
+    user_prompt_text = None
+    if loader is not None:
+        user_prompt_text = prompt.user_prompt_template.render(data=loader.data)
+
     data = J1UserPromptData(
         target_system_prompt=prompt.system_prompt_content,
-        target_user_prompt_template=prompt.user_prompt_template.render(
-            data=loader.data,
-        ),
+        target_user_prompt_template=user_prompt_text,
     )
 
     return run_j1_over_permissive(
