@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from ...constants import PromptIdEnum
 from ...prompts import Prompt
+from ...llm_output import extract_json
 from ...bedrock_utils import converse
 
 if T.TYPE_CHECKING:
@@ -78,17 +79,6 @@ edge cases without runaway API spend.
 """
 
 
-def _extract_json(text: str) -> str:
-    """Strip markdown code fences if present, return raw JSON string.
-
-    Many models wrap JSON output in `````json … ````` blocks even when not
-    asked to.  This helper normalises that so downstream parsing always
-    receives plain JSON.
-    """
-    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
-    return match.group(1) if match else text
-
-
 def run_p1_extraction(
     client: "BedrockRuntimeClient",
     data: P1ExtractionUserPromptData,
@@ -135,7 +125,7 @@ def run_p1_extraction(
 
     for attempt in range(MAX_RETRIES):
         text = converse(client, model_id, system, messages)
-        json_text = _extract_json(text)
+        json_text = extract_json(text)
 
         try:
             return P1ExtractionOutput(**json.loads(json_text))

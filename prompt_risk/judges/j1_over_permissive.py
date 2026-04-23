@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from ..constants import PromptIdEnum
 from ..prompts import Prompt
+from ..llm_output import extract_json
 from ..bedrock_utils import converse
 
 if T.TYPE_CHECKING:
@@ -65,12 +66,6 @@ class J1Result(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 MAX_RETRIES = 3
-
-
-def _extract_json(text: str) -> str:
-    """Strip markdown code fences if present, return raw JSON string."""
-    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
-    return match.group(1) if match else text
 
 
 # ---------------------------------------------------------------------------
@@ -119,7 +114,7 @@ def run_j1_over_permissive(
 
     for attempt in range(MAX_RETRIES):
         text = converse(client, model_id, system, messages)
-        json_text = _extract_json(text)
+        json_text = extract_json(text)
 
         try:
             return J1Result(**json.loads(json_text))
