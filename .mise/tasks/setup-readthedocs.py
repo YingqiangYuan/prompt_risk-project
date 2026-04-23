@@ -39,6 +39,11 @@ def main():
         print("Create a token at: https://app.readthedocs.org/accounts/tokens/")
         sys.exit(1)
 
+    # overwrite project_name, readthedocs_slug
+    from utils import config
+    config.project_name = "yq_prompt_risk"
+    config.readthedocs_slug = "yq-prompt-risk"
+
     project_name = get_project_name()
     project_slug = get_readthedocs_slug()
     repo_url = get_github_repo_url()
