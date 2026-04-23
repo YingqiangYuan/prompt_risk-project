@@ -7,16 +7,25 @@ from prompt_risk.one.api import one
 
 client = one.bedrock_runtime_client
 
-for case in P1LoaderEnum:
-    loader = case.value
-    print(f"\n{'='*60}")
-    print(f"{case.name}  ({loader.type}/{loader.name})")
+case = P1LoaderEnum.a_01_injection_in_narrative
+# case = P1LoaderEnum.a_02_hidden_instructions
+# case = P1LoaderEnum.a_03_role_confusion
+# case = P1LoaderEnum.b_01_auto_rear_end
+# case = P1LoaderEnum.b_02_property_fire
+# case = P1LoaderEnum.b_03_workers_comp_fall
+# case = P1LoaderEnum.b_04_gl_slip_and_fall
+# case = P1LoaderEnum.b_05_auto_multi_vehicle
+# case = P1LoaderEnum.b_06_ambiguous_lob
 
-    output = run_p1_extraction(client=client, data=loader.data, prompt_version="01")
+loader = case.value
+print(f"\n{'='*60}")
+print(f"{case.name}  ({loader.type}/{loader.name})")
 
-    if loader.expected or loader.attack_target:
-        result = evaluate(output, loader.expected, loader.attack_target)
-        print_eval_result(result)
-    else:
-        print("  (no assertions defined)")
-        print(output)
+output = run_p1_extraction(client=client, data=loader.data, prompt_version="01")
+
+if loader.expected or loader.attack_target:
+    result = evaluate(output, loader.expected, loader.attack_target)
+    print_eval_result(result)
+else:
+    print("  (no assertions defined)")
+    print(output)

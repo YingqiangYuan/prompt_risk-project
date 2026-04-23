@@ -11,6 +11,8 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from ...constants import PromptIdEnum
 from ...prompts import Prompt
+from ...bedrock_utils import converse
+
 from .prompt import P1ExtractionUserPromptData
 
 if T.TYPE_CHECKING:
@@ -84,21 +86,6 @@ def _extract_json(text: str) -> str:
     return match.group(1) if match else text
 
 
-def _converse(
-    client: "BedrockRuntimeClient",
-    model_id: str,
-    system: list[dict],
-    messages: list[dict],
-) -> str:
-    """Call Bedrock Converse API and return the assistant's text response."""
-    response = client.converse(
-        modelId=model_id,
-        system=system,
-        messages=messages,
-    )
-    return response["output"]["message"]["content"][0]["text"]
-
-
 def run_p1_extraction(
     client: "BedrockRuntimeClient",
     data: P1ExtractionUserPromptData,
@@ -144,7 +131,7 @@ def run_p1_extraction(
     ]
 
     for attempt in range(MAX_RETRIES):
-        text = _converse(client, model_id, system, messages)
+        text = converse(client, model_id, system, messages)
         json_text = _extract_json(text)
 
         try:
