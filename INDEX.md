@@ -62,3 +62,37 @@ End-to-end example scripts demonstrating how to use the library. Each script pin
   - [run_uc1_p3_triage.py](examples/uc1-claim-intake/run_uc1_p3_triage.py) — Run P3 triage.
 - [judges/](examples/judges/) — Judge examples:
   - [run_j1_on_uc1_p1.py](examples/judges/run_j1_on_uc1_p1.py) — Run J1 Over-Permissive judge on UC1-P1 prompt across all test data loaders.
+
+---
+
+## `docs/source/` — Documentation
+
+Sphinx documentation source. Narrative docs are RST files; demo notebooks are Jupyter (`.ipynb` for humans, `.md` export for AI consumption).
+
+- [index.rst](docs/source/index.rst) — Documentation root (table of contents, README include)
+
+### 01-Project-Background — Research context and risk framework
+
+- [index.rst](docs/source/01-Project-Background/index.rst) — Project Background: LLM Prompt Risk Management for the Insurance Industry
+  - [01-Risk-Taxonomy/index.rst](docs/source/01-Project-Background/01-Risk-Taxonomy/index.rst) — Internal Prompt Authoring Risk: Risk Taxonomy (five risk categories: Over-Permissive Authorization, Hardcoded Sensitive Data, Role Confusion, Instruction Conflict, Logic Ambiguity)
+  - [02-Prompt-Risk-Matrix/index.rst](docs/source/01-Project-Background/02-Prompt-Risk-Matrix/index.rst) — Internal Prompt Authoring Risk: Prompt Risk Matrix (three-dimensional scoring: Exploitability, Impact, Detectability)
+  - [03-Governance-Recommendations/index.rst](docs/source/01-Project-Background/03-Governance-Recommendations/index.rst) — Internal Prompt Authoring Risk: Governance Recommendations (Authoring Guidelines, Four-Gate Audit Workflow, Automated Scanning, Framework Alignment)
+
+### 02 through 08 — Design docs and demos
+
+- [02-Use-Case-Catalog/index.rst](docs/source/02-Use-Case-Catalog/index.rst) — Use Case Catalog: AI Applications with Prompt Exposure in Insurance
+- [03-Judge-Catalog/index.rst](docs/source/03-Judge-Catalog/index.rst) — Judge Catalog: LLM-as-Judge Security Evaluation Pipeline
+- [04-Data-Structure-Design/index.rst](docs/source/04-Data-Structure-Design/index.rst) — Data Structure Design: Prompt & Test Data Organization
+- [05-Prompt-Runner-And-Evaluation/index.rst](docs/source/05-Prompt-Runner-And-Evaluation/index.rst) — Prompt Runner & Evaluation Pipeline
+- 06-Prompt-Runner-And-Evaluation-Demo — UC1-P1 Extraction: Prompt Runner & Evaluation Demo
+  - [index.ipynb](docs/source/06-Prompt-Runner-And-Evaluation-Demo/index.ipynb) — Jupyter notebook (interactive)
+  - [index.md](docs/source/06-Prompt-Runner-And-Evaluation-Demo/index.md) — Markdown export (AI-readable)
+- [07-Judge-Design/index.rst](docs/source/07-Judge-Design/index.rst) — Judge Design: LLM-as-Judge Prompt Security Evaluation
+- 08-Judge-Demo — J1 Over-Permissive Authorization Judge Demo
+  - [index.ipynb](docs/source/08-Judge-Demo/index.ipynb) — Jupyter notebook (interactive)
+  - [index.md](docs/source/08-Judge-Demo/index.md) — Markdown export (AI-readable)
+
+### 99-Maintainer-Guide — Project infrastructure
+
+- [index.rst](docs/source/99-Maintainer-Guide/index.rst) — Maintainer Guide
+  - [01-Project-Overview/index.rst](docs/source/99-Maintainer-Guide/01-Project-Overview/index.rst) — Project Overview (dev tools: mise, uv, Claude Code, pytest, Sphinx, GitHub Actions)
