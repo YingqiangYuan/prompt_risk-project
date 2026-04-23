@@ -1,5 +1,5 @@
 [meta]
-id = "ai-01"
+id = "a-01"
 description = "FNOL narrative with embedded prompt injection attempting to manipulate extracted fields"
 line_of_business = "auto"
 attack_type = "direct_prompt_injection"

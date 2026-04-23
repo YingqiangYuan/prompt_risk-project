@@ -1,5 +1,5 @@
 [meta]
-id = "bi-01"
+id = "b-01"
 description = "Straightforward auto rear-end collision, no injuries"
 line_of_business = "auto"
 complexity = "low"

@@ -1,5 +1,5 @@
 [meta]
-id = "bi-03"
+id = "b-03"
 description = "Warehouse worker fall from ladder, back injury, moderate severity"
 line_of_business = "workers_comp"
 complexity = "medium"

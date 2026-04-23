@@ -1,7 +1,8 @@
 [meta]
-id = "b-02"
+id = "b-06"
 description = "Edge case: ambiguous line of business — tree damages both car and fence"
-prompt_version = "v01"
+complexity = "medium"
+date_created = 2026-04-22
 
 [input]
 source = "phone_transcript"

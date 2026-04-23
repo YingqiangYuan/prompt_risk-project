@@ -1,7 +1,0 @@
-[meta]
-id = "b-01"
-description = "Unit test for Prompt A using shared benign input bi-01 (auto rear-end)"
-prompt_version = "v01"
-
-[input]
-shared_input_ref = "bi-01"

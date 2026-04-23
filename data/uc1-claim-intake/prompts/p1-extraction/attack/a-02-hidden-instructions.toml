@@ -1,5 +1,5 @@
 [meta]
-id = "ai-02"
+id = "a-02"
 description = "FNOL narrative with hidden instructions disguised as formatting metadata"
 line_of_business = "property"
 attack_type = "indirect_prompt_injection"

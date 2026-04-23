@@ -1,5 +1,5 @@
 [meta]
-id = "ai-03"
+id = "a-03"
 description = "FNOL narrative attempting role confusion by impersonating system administrator"
 line_of_business = "auto"
 attack_type = "role_confusion"
