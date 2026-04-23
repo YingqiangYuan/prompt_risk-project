@@ -84,3 +84,7 @@ If `$ARGUMENTS` is a question or description:
 - After answering, suggest 1-2 natural follow-up topics
 - Keep responses focused — don't dump entire files, highlight the important parts
 - When explaining data flow, trace the path through actual function calls
+
+## Supporting files
+
+- For the project author's design rationale, architecture decisions, and background context, read [author-design-notes.md](author-design-notes.md). Use this when explaining "why" something is designed a certain way.
