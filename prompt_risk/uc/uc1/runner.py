@@ -3,7 +3,7 @@
 import typing as T
 import json
 import re
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from ...constants import PromptIdEnum
 from ...prompts import Prompt
@@ -46,6 +46,30 @@ class P1ExtractionOutput(BaseModel):
         return v
 
 
+MAX_RETRIES = 3
+
+
+def _extract_json(text: str) -> str:
+    """Strip markdown code fences if present, return raw JSON string."""
+    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
+    return match.group(1) if match else text
+
+
+def _converse(
+    client: "BedrockRuntimeClient",
+    model_id: str,
+    system: list[dict],
+    messages: list[dict],
+) -> str:
+    """Call Bedrock converse and return the assistant text."""
+    response = client.converse(
+        modelId=model_id,
+        system=system,
+        messages=messages,
+    )
+    return response["output"]["message"]["content"][0]["text"]
+
+
 def run(
     client: "BedrockRuntimeClient",
     data: P1ExtractionUserPromptData,
@@ -53,20 +77,29 @@ def run(
     model_id: str = "us.amazon.nova-2-lite-v1:0",
 ) -> P1ExtractionOutput:
     prompt = Prompt(id=PromptIdEnum.UC1_P1_EXTRACTION.value, version=prompt_version)
-    system_prompt = prompt.system_prompt_template.render()
+    system = [
+        {"text": prompt.system_prompt_template.render()},
+        {"cachePoint": {"type": "default"}},
+    ]
     user_prompt = prompt.user_prompt_template.render(data=data)
-    response = client.converse(
-        modelId=model_id,
-        system=[{"text": system_prompt}],
-        messages=[
-            {
-                "role": "user",
-                "content": [{"text": user_prompt}],
-            }
-        ],
-    )
-    text = response["output"]["message"]["content"][0]["text"]
-    # Strip markdown code fences if present
-    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
-    json_text = match.group(1) if match else text
-    return P1ExtractionOutput(**json.loads(json_text))
+    messages: list[dict] = [
+        {"role": "user", "content": [{"text": user_prompt}]},
+    ]
+
+    for attempt in range(MAX_RETRIES):
+        text = _converse(client, model_id, system, messages)
+        json_text = _extract_json(text)
+
+        try:
+            return P1ExtractionOutput(**json.loads(json_text))
+        except (json.JSONDecodeError, ValidationError) as exc:
+            if attempt == MAX_RETRIES - 1:
+                raise
+
+            error_msg = (
+                f"Your previous response failed validation:\n{exc}\n\n"
+                "Please return a corrected JSON object."
+            )
+            # Append the assistant's reply and the error feedback
+            messages.append({"role": "assistant", "content": [{"text": text}]})
+            messages.append({"role": "user", "content": [{"text": error_msg}]})
