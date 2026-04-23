@@ -106,3 +106,8 @@ depends = ["inst"]
 description = "🔧 Update GitHub repository description and homepage using PyGithub"
 run = ".venv/bin/python .mise/tasks/update-github-metadata.py"
 depends = ["inst"]
+
+[tasks.lab]
+description = "Launch Jupyter Lab"
+run = ".venv/bin/jupyter-lab"
+depends = ["inst"]
