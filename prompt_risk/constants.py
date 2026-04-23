@@ -17,6 +17,7 @@ class PromptIdEnum(enum.StrEnum):
     JUDGE_J1_OVER_PERMISSIVE = f"{UseCaseIdEnum.JUDGE.value}:j1-over-permissive"
     UC1_P1_EXTRACTION = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE.value}:p1-extraction"
     UC1_P2_CLASSIFICATION = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE.value}:p2-classification"
+    UC1_P3_TRIAGE = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE.value}:p3-triage"
 
     @property
     def use_case_id(self) -> str:
