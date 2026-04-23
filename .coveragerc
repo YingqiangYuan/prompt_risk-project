@@ -8,6 +8,9 @@ omit =
     prompt_risk/_version.py
     prompt_risk/cli.py
     prompt_risk/paths.py
+    prompt_risk/uc/*
+    prompt_risk/judges/*
+    prompt_risk/one/*
 
 [report]
 # Regexes for lines to exclude from consideration
