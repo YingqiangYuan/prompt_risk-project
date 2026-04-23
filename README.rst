@@ -50,22 +50,12 @@ Welcome to ``prompt_risk`` Documentation
 .. image:: https://yq-prompt-risk.readthedocs.io/en/latest/_static/prompt_risk-logo.png
     :target: https://yq-prompt-risk.readthedocs.io/en/latest/
 
-Documentation for ``prompt_risk``.
+``prompt_risk`` is a Python framework for detecting, scoring, and mitigating security risks in LLM prompts deployed across enterprise environments. It combines deterministic rule-based scanning (secrets detection, keyword blocklists) with LLM-as-Judge semantic analysis to catch vulnerabilities that regex alone cannot find — over-permissive authorization, hardcoded sensitive data, role confusion, instruction conflicts, and logic ambiguity.
 
+The project ships with six insurance-industry use cases (from FNOL (First Notice of Loss) claim intake pipelines to autonomous claims agents) as reference implementations, each with versioned prompt templates, normal and adversarial test data, and automated evaluation pipelines. Prompts and test cases are stored as Jinja templates and TOML files under a structured ``data/`` directory, making it easy to version, review, and extend.
 
-.. _install:
+Designed for integration into CI/CD workflows and prompt registries, ``prompt_risk`` turns prompt security from a manual, ad-hoc review process into a repeatable, auditable engineering practice. Install via ``pip install prompt-risk`` and start scanning your prompts programmatically.
 
-Install
-------------------------------------------------------------------------------
-
-``prompt_risk`` is released on PyPI, so all you need is to:
-
-.. code-block:: console
-
-    $ pip install prompt-risk
-
-To upgrade to latest version:
-
-.. code-block:: console
-
-    $ pip install --upgrade prompt-risk
+- `Documentation & Demo <https://yq-prompt-risk.readthedocs.io/en/latest/>`_
+- `GitHub Repository <https://github.com/YingqiangYuan/prompt_risk-project>`_
+- `Submit an Issue <https://github.com/YingqiangYuan/prompt_risk-project/issues>`_
