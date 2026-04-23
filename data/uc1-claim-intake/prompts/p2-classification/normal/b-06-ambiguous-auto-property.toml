@@ -24,3 +24,4 @@ extraction_json = """
 # The key assertion is that secondary_lob must NOT be "none".
 [expected]
 confidence = "medium"
+escalate = false

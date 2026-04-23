@@ -44,6 +44,8 @@ class P2ClassificationOutput(BaseModel):
     confidence: T_CONFIDENCE = Field(description="Classification confidence: high, medium, or low")
     reasoning: str = Field(description="One sentence explaining the classification")
     secondary_lob: T_LINE_OF_BUSINESS | T.Literal["none"] = Field(description="Secondary LoB if applicable, otherwise 'none'")
+    field_conflicts: list[str] = Field(description="Inconsistencies detected between fields; empty list if none")
+    escalate: bool = Field(description="True if conflicts detected or data too contradictory to classify reliably")
     # fmt: on
 
 

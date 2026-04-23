@@ -25,3 +25,4 @@ extraction_json = """
 line_of_business = "auto"
 confidence = "high"
 secondary_lob = "none"
+escalate = false
