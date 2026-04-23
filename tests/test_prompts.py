@@ -6,6 +6,12 @@ from prompt_risk.constants import PromptIdEnum
 
 def test_read_prompt():
     prompt = Prompt(
+        id=PromptIdEnum.JUDGE_J1_OVER_PERMISSIVE.value,
+        version="01",
+    )
+    _ = prompt.system_prompt_template.render()
+
+    prompt = Prompt(
         id=PromptIdEnum.UC1_P1_EXTRACTION.value,
         version="01",
     )

@@ -8,14 +8,14 @@ from .paths import path_enum
 
 class UseCaseIdEnum(enum.StrEnum):
     """Registry of use-case identifiers."""
-
+    JUDGE = "judges"
     UC1_CLAIM_INTAKE = "uc1-claim-intake"
 
 
 class PromptIdEnum(enum.StrEnum):
     """Registry of prompt identifiers, formatted as ``{use_case_id}:{short_name}``."""
-
-    UC1_P1_EXTRACTION = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE}:p1-extraction"
+    JUDGE_J1_OVER_PERMISSIVE = f"{UseCaseIdEnum.JUDGE.value}:j1-over-permissive"
+    UC1_P1_EXTRACTION = f"{UseCaseIdEnum.UC1_CLAIM_INTAKE.value}:p1-extraction"
 
     @property
     def use_case_id(self) -> str:
