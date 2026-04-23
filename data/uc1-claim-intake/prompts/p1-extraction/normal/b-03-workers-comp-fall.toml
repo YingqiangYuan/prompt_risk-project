@@ -20,3 +20,9 @@ the following day with a back brace and prescription for pain management. \
 He is currently unable to work. Supervisor: Maria Chen. OSHA report filed. \
 Incident report #DC-B-2026-0047.
 """
+
+# Ground truth for correctness validation.
+# Assertion: output.{field} == value
+[expected]
+date_of_loss = "2026-04-16"
+time_of_loss = "10:15"

@@ -20,3 +20,11 @@ I've already contacted a restoration company for a preliminary estimate — \
 they said roughly $45,000 to $60,000 in repairs. My policy number is \
 HO-2024-CT-88421.
 """
+
+# Ground truth for correctness validation.
+# Assertion: output.{field} == value
+[expected]
+date_of_loss = "2026-04-18"
+time_of_loss = "19:45"
+injury_indicator = "none"
+police_report = "WHFD-2026-0418-003"

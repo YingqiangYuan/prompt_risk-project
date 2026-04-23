@@ -23,3 +23,11 @@ My policy number is AU-2025-CT-55123. I have a dashcam and the footage \
 may have captured the impact. I'm going to need a rental car and I can't \
 work right now because of my injuries.
 """
+
+# Ground truth for correctness validation.
+# Assertion: output.{field} == value
+[expected]
+date_of_loss = "2026-04-19"
+time_of_loss = "18:10"
+police_report = "CSP-2026-91-04192"
+estimated_severity = "high"

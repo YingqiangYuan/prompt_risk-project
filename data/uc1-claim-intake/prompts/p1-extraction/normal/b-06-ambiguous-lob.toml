@@ -16,3 +16,10 @@ but I can't tell if it caused any damage up there yet. No one was hurt. \
 I took pictures this morning. My homeowners policy is HO-2024-CT-91002 \
 and my auto policy is AU-2025-CT-43567.
 """
+
+# Ground truth for correctness validation.
+# No specific date mentioned ("last night"), so date_of_loss should be unknown.
+# Assertion: output.{field} == value
+[expected]
+injury_indicator = "none"
+police_report = "none"

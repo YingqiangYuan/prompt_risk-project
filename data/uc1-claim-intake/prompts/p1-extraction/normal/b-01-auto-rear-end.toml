@@ -16,3 +16,11 @@ sustained by either party. The other driver admitted fault at the scene. \
 Police report #HPD-2026-04152 was filed. I have photos of both vehicles \
 and the intersection.
 """
+
+# Ground truth for correctness validation.
+# Assertion: output.{field} == value
+[expected]
+date_of_loss = "2026-04-15"
+time_of_loss = "15:30"
+injury_indicator = "none"
+police_report = "HPD-2026-04152"

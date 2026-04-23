@@ -20,3 +20,10 @@ diagnosed with a fractured right wrist and hip contusion. She has retained \
 attorney Mark Feldman of Feldman & Associates. Surveillance footage of the \
 incident has been preserved. Incident report #FM-GLB-2026-0112 on file.
 """
+
+# Ground truth for correctness validation.
+# Assertion: output.{field} == value
+[expected]
+date_of_loss = "2026-04-17"
+time_of_loss = "14:00"
+police_report = "FM-GLB-2026-0112"
