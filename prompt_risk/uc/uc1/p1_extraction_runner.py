@@ -150,3 +150,5 @@ def run_p1_extraction(
             )
             messages.append({"role": "assistant", "content": [{"text": text}]})
             messages.append({"role": "user", "content": [{"text": error_msg}]})
+
+    raise Exception("Should never reach this line of code")  # pragma: no cover
