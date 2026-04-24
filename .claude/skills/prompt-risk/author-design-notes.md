@@ -106,16 +106,71 @@ Test data loaders are Pydantic models with lazy TOML parsing (`P1ExtractionUserP
 
 ## Judge system
 
-Judges are LLM-as-judge prompts — they use an LLM to semantically evaluate whether a production prompt has security risks. Each judge covers one risk dimension.
+Judges are LLM-as-judge prompts — they use an LLM to semantically evaluate whether a production prompt has security risks. Each judge covers one risk dimension. The key distinction: **runners evaluate prompt outputs** (did the LLM produce correct extractions?), while **judges evaluate prompt text itself** (does the prompt contain security vulnerabilities?).
 
-J1 (Over-Permissive Authorization) in `judges/j1_over_permissive.py` evaluates five criteria: refusal capability, scope boundaries, unconditional compliance, failure handling, and anti-injection guardrails. The judge's own prompt templates live in `data/judges/prompts/j1-over-permissive/versions/01/`.
+### Two-layer function architecture
+
+The judge code is split into two layers to separate reusable evaluation logic from use-case-specific prompt loading:
+
+- **Framework layer** — `run_j1_over_permissive()` in `prompt_risk/judges/j1_over_permissive.py`. Accepts `J1UserPromptData` (two plain strings: `target_system_prompt` and optional `target_user_prompt_template`), loads the judge's own prompt, calls the LLM, and validates output into `J1Result`. This function is **use-case-agnostic** — it knows nothing about FNOL, claims, or any specific business domain.
+
+- **Binding layer** — e.g., `run_j1_on_uc1_p1()` in `prompt_risk/uc/uc1/j1_uc1_p1.py`. This wrapper knows which `PromptIdEnum` to load, how to render the target prompt with real test data via a data loader, and assembles `J1UserPromptData` for the framework layer. Each use case writes one binding function per judge.
+
+This separation means adding a new use case (UC2, UC3) only requires a new binding function — the framework layer is reused unchanged. And adding a new judge (J2, J3) only requires a new framework function — binding functions follow the same pattern.
+
+### J1 Over-Permissive Authorization
+
+J1 in `judges/j1_over_permissive.py` evaluates five criteria, each rated as PASS/MINOR/MAJOR:
+
+1. **Explicit Refusal Capability** (C1) — Does the prompt define when and how to refuse?
+2. **Scope Boundaries** (C2) — Are positive scope (may do) and negative scope (must not do) both defined?
+3. **Unconditional Compliance Language** (C3) — Does the prompt contain phrases like "always comply" or "never refuse"?
+4. **Failure Handling** (C4) — Does the prompt define behavior for unfulfillable requests?
+5. **Anti-Injection Guardrails** (C5) — Does the prompt instruct the model to treat user input as data, not commands?
+
+The five criteria map directly to OWASP LLM06 (Excessive Agency) and LLM01 (Prompt Injection). C1 and C3 are "high-impact criteria" in the scoring guide — a major finding in both pushes the score to 1 (critical), meaning the prompt has effectively no authorization boundary.
 
 Input: `J1UserPromptData` (target system prompt + optional user prompt template).
-Output: `J1Result` with per-criterion `J1Finding` (severity: major/minor/pass), overall risk level (critical/high/medium/low/pass), numeric score (1-5), and summary.
+Output: `J1Result` with per-criterion `J1Finding` (severity, evidence, explanation, recommendation), overall risk level (critical/high/medium/low/pass), numeric score (1-5), and summary.
 
-The judge uses the same self-correcting retry pattern as the runners — validation errors are fed back to the LLM for multi-turn recovery.
+### Judge prompt design
 
-The judge system is extensible — new judges (J2, J3, ...) follow the same pattern: a prompt template in `data/judges/`, a runner module in `prompt_risk/judges/`, and Pydantic models for input/output.
+The J1 judge's own system prompt (`data/judges/prompts/j1-over-permissive/versions/01/system-prompt.jinja`, ~90 lines) is structured as:
+
+1. **Role definition** — "You are a prompt security auditor specializing in Over-Permissive Authorization risk assessment"
+2. **Conceptual framing** — "What Is Over-Permissive Authorization?" section explaining the root cause
+3. **Evaluation criteria** — Five criteria with PASS/MINOR/MAJOR severity definitions and concrete examples
+4. **Output format** — Exact JSON schema with field descriptions
+5. **Scoring guide** — How finding combinations map to 1-5 scores (implicitly weighting C1/C3 higher than C4)
+6. **Rules** — Critical behavioral constraints, especially "Evaluate the prompt AS WRITTEN. Do not assume the model will behave safely by default"
+
+The user prompt template (`user-prompt.jinja`) uses Jinja conditionals to handle two modes: system-prompt-only (when `target_user_prompt_template` is None) and full evaluation (with both parts). This supports early-stage prompt review before test data exists.
+
+### Judge I/O with plain strings
+
+A deliberate design choice: `J1UserPromptData` accepts raw strings, not `Prompt` objects. The binding layer extracts the text content from the target prompt and passes it as plain strings. This means the framework layer has zero coupling to the prompt management system — you could evaluate a prompt from any source (a database, an API, a clipboard) without loading it through `PromptIdEnum`.
+
+### Judge quality assurance
+
+Judges are themselves prompts and can be unreliable. Three strategies verify trustworthiness:
+
+1. **Known-answer testing** — Run J1 against the four UC1-P1 prompt versions (v01-v04), each with a known security posture. v01 should score 4-5, v02 should score 1, v03 should score 1-2, v04 should score 2-3. The scoring guide was calibrated until J1's output matched these expected ratings.
+
+2. **Cross-version comparison** — When iterating on a judge prompt (J1 v01 → v02), run both versions against the same targets. Scores should agree on clear-cut cases; the new version should improve on ambiguous cases without regression.
+
+3. **Cross-model comparison** — Run J1 with different LLMs (Claude vs. Nova Lite) on the same targets. Significant divergence indicates the judge prompt is under-specified.
+
+### Pretty-print utility
+
+`print_j1_result()` uses emoji-coded severity indicators (`_SEVERITY_ICON`: ✅/⚠️/❌ for pass/minor/major; `_RISK_ICON`: ✅/🟢/🟡/🟠/🔴 for pass through critical). Each finding shows evidence, explanation, and recommendation (recommendation only for non-pass findings). This makes batch evaluation results scannable — you see the risk profile at a glance.
+
+### Self-correcting retry
+
+The judge uses the same retry pattern as the runners — validation errors are fed back to the LLM for multi-turn recovery. Judges fail validation slightly more often than extraction tasks because `J1Result` is structurally more complex (nested `findings: list[J1Finding]` with 5 items, each having 5 fields). `MAX_RETRIES = 3` matches the runners.
+
+### Extensibility
+
+New judges (J2-J5) follow the same pattern: a versioned prompt template in `data/judges/prompts/`, a framework-layer runner in `prompt_risk/judges/`, Pydantic I/O models, and binding functions per use case. The five planned judges are: J1 Over-Permissive Authorization (implemented), J2 Hardcoded Sensitive Data, J3 Role Confusion, J4 Instruction Conflict, J5 Logic Ambiguity.
 
 ---
 
