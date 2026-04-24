@@ -20,7 +20,7 @@ client = one.bedrock_runtime_client
 EXTRACTION_VERSION = "01"
 JUDGE_VERSION = "01"
 
-case = P1LoaderEnum.a_01_injection_in_narrative
+# case = P1LoaderEnum.a_01_injection_in_narrative
 # case = P1LoaderEnum.a_02_hidden_instructions
 # case = P1LoaderEnum.a_03_role_confusion
 # case = P1LoaderEnum.b_01_auto_rear_end
@@ -28,7 +28,7 @@ case = P1LoaderEnum.a_01_injection_in_narrative
 # case = P1LoaderEnum.b_03_workers_comp_fall
 # case = P1LoaderEnum.b_04_gl_slip_and_fall
 # case = P1LoaderEnum.b_05_auto_multi_vehicle
-# case = P1LoaderEnum.b_06_ambiguous_lob
+case = P1LoaderEnum.b_06_ambiguous_lob
 
 loader = case.value
 print(f"\n{'='*60}")
@@ -55,7 +55,8 @@ judge_output = run_p1_extraction_judge(
     data=judge_data,
     prompt_version=JUDGE_VERSION,
 )
-print(f"pass: {judge_output.pass_}")
+icon = "🟢" if judge_output.pass_ else "🔴"
+print(f"{icon} pass: {judge_output.pass_}")
 print(f"reason: {judge_output.reason}")
 if judge_output.field_errors:
     print("field_errors:")
