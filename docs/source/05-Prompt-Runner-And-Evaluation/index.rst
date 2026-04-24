@@ -332,3 +332,140 @@ Adding a new test case
 2. Add ``[expected]`` and/or ``[attack_target]`` sections
 3. Register in the enum in ``p1_test_data.py``
 4. Run the script — no other code changes needed
+
+----
+
+LLM-as-Judge: Evaluating Business Correctness
+------------------------------------------------------------------------------
+Assertion-based evaluation checks a few key fields with hard-coded rules (``==`` / ``!=``). It is fast, deterministic, and catches hard failures — but it cannot assess subjective fields like ``damage_description`` or ``injury_indicator`` where multiple values could be defensible.
+
+**LLM-as-Judge** fills this gap. A separate judge prompt reads the original input and the extraction output, then evaluates whether every extracted field is factually correct, properly formatted, and consistent with the narrative.
+
+Design principle: separation of concerns
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The per-prompt judge evaluates **business correctness only** — "given the narrative, are the extracted fields right?" It does NOT evaluate injection resistance or prompt security. That concern is handled by a separate security judge (``j1-over-permissive``).
+
+Keeping them separate enables a 2×2 diagnostic matrix:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
+
+   * -
+     - Security ✅ (not compromised)
+     - Security ❌ (compromised)
+   * - **Business ✅** (data correct)
+     - Ideal
+     - Attack detected, but output happened to be correct
+   * - **Business ❌** (data wrong)
+     - Model error, not attack-related
+     - Attack succeeded and corrupted output
+
+Mixing both concerns into one judge collapses this matrix and causes the judge to speculate about attack influence rather than objectively assessing factual accuracy.
+
+Judge prompt structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The judge prompt lives alongside the extraction prompt as a sibling:
+
+.. code-block:: text
+
+   data/uc1-claim-intake/prompts/
+     p1-extraction/            # the prompt being evaluated
+       versions/01/
+     p1-extraction-judge/      # its business correctness judge
+       versions/01/
+         system-prompt.jinja   # evaluation criteria
+         user-prompt.jinja     # {{ data.input }} + {{ data.output }}
+         metadata.toml
+
+The judge system prompt lists every evaluation criterion derived from the extraction prompt's requirements — field formats, allowed enum values, factual grounding — but explicitly excludes injection-related checks.
+
+Judge runner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Module:** ``prompt_risk/uc/uc1/p1_extraction_judge_runner.py``
+
+The judge runner follows the same pattern as the extraction runner (caching, retry-on-validation-failure), with its own output schema:
+
+.. code-block:: python
+
+   class P1ExtractionJudgeOutput(BaseModel):
+       pass_: bool = Field(alias="pass")     # true only if ALL criteria met
+       reason: str                            # explanation of the judgment
+       field_errors: list[FieldError]          # which fields failed and why
+
+Example usage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Script:** ``examples/uc1-claim-intake/run_uc1_p1_extraction_judge.py``
+
+.. code-block:: python
+
+   from prompt_risk.uc.uc1.p1_extraction_runner import run_p1_extraction
+   from prompt_risk.uc.uc1.p1_extraction_judge_runner import (
+       run_p1_extraction_judge,
+       P1ExtractionJudgeUserPromptData,
+   )
+   from prompt_risk.uc.uc1.p1_test_data import P1LoaderEnum
+   from prompt_risk.one.api import one
+
+   client = one.bedrock_runtime_client
+   case = P1LoaderEnum.b_01_auto_rear_end
+   loader = case.value
+
+   # Step 1: run extraction
+   extraction_output = run_p1_extraction(
+       client=client, data=loader.data, prompt_version="01",
+   )
+
+   # Step 2: run judge on the extraction result
+   judge_data = P1ExtractionJudgeUserPromptData(
+       input=loader.data.model_dump_json(indent=2),
+       output=extraction_output.model_dump_json(indent=2),
+   )
+   judge_output = run_p1_extraction_judge(
+       client=client, data=judge_data, prompt_version="01",
+   )
+
+   icon = "🟢" if judge_output.pass_ else "🔴"
+   print(f"{icon} pass: {judge_output.pass_}")
+   print(f"reason: {judge_output.reason}")
+
+Data flow with judge
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. code-block:: text
+
+    TOML file
+    +-----------------------------------+
+    | [input]  -> P1ExtractionUserPromptData --> run_p1_extraction()
+    | [expected]      ----- (assertions) ----+            |
+    | [attack_target] ----- (assertions) ----+            |
+    +-----------------------------------+    |            v
+                                         |   |   P1ExtractionOutput
+                                         |   |       |         |
+                                         v   v       |         v
+                    Assertion-based:  evaluate()      |   P1ExtractionJudgeUserPromptData
+                                         |            |         |
+                                         v            |         v
+                                    EvalResult        |  run_p1_extraction_judge()
+                                                      |         |
+                                                      |         v
+                                                      |  P1ExtractionJudgeOutput
+                                                      |    (pass / reason / field_errors)
+
+Three evaluation layers at a glance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. list-table::
+   :header-rows: 1
+   :widths: 20 35 45
+
+   * - Layer
+     - What it checks
+     - Key module / judge
+   * - **Assertion-based**
+     - Hard facts (dates, report numbers) + injection resistance (``!=``)
+     - ``prompt_risk.evaluations``
+   * - **Per-prompt judge**
+     - Business correctness of every field (factual accuracy, format)
+     - ``p1_extraction_judge_runner``
+   * - **Security judge**
+     - Prompt design quality (authorization boundaries, guardrails)
+     - ``j1-over-permissive``
