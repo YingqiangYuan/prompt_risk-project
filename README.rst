@@ -147,7 +147,49 @@ Normal cases verify correct extraction (``eq``/``in``). Attack cases verify the 
 
 ----
 
-**4. LLM-as-Judge Security Assessment** — Five judges evaluate prompt text for distinct risk dimensions. Each judge is itself a prompt that performs semantic analysis:
+**4. LLM-as-Judge Business Correctness** — Assertion-based evaluation checks a few key fields with hard-coded rules. LLM-as-Judge fills the gap by evaluating whether **every** extracted field is factually correct:
+
+.. code-block:: mermaid
+
+    graph LR
+        subgraph pipeline["Two-Step Pipeline"]
+            direction TB
+            STEP1["Step 1: Run Extraction<br/>FNOL → P1 → JSON output"]
+            STEP2["Step 2: Run Judge<br/>input + output → verdict"]
+            STEP1 --> STEP2
+        end
+
+        STEP2 --> VERDICT
+
+        subgraph VERDICT["Judge Output"]
+            PASS_F["pass: true/false"]
+            REASON["reason: explanation"]
+            ERRORS["field_errors: [{field, issue}]"]
+        end
+
+        style STEP1 fill:#1a5276,stroke:#2e86c1,color:#fff
+        style STEP2 fill:#784212,stroke:#e67e22,color:#fff
+        style PASS_F fill:#1e6f3e,stroke:#27ae60,color:#fff
+
+The per-prompt judge evaluates **business correctness only** — it does NOT evaluate injection resistance. Keeping them separate enables a diagnostic matrix:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
+
+   * -
+     - Security ✅
+     - Security ❌
+   * - **Business ✅**
+     - Ideal
+     - Attack detected, output correct
+   * - **Business ❌**
+     - Model error
+     - Attack corrupted output
+
+----
+
+**5. LLM-as-Judge Security Assessment** — Five judges evaluate prompt text for distinct risk dimensions. Each judge is itself a prompt that performs semantic analysis:
 
 .. code-block:: mermaid
 
@@ -182,7 +224,7 @@ J1 (implemented) evaluates 5 criteria: refusal capability, scope boundaries, unc
 
 ----
 
-**5. Prompt Versioning** — Every prompt (including judges) is versioned with its own template files and metadata:
+**6. Prompt Versioning** — Every prompt (including judges) is versioned with its own template files and metadata:
 
 .. code-block:: mermaid
 

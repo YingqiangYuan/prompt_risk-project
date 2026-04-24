@@ -12,6 +12,11 @@ Five-prompt chained pipeline (P1 → P2 → P3 → P4 → P5) that transforms ra
       - `metadata.toml` — Version description and date
     - [normal/](prompts/p1-extraction/normal/) — Normal (non-malicious) FNOL test inputs. One `.toml` per scenario, covering auto, property, workers comp, GL, and edge cases.
     - [attack/](prompts/p1-extraction/attack/) — Malicious FNOL test inputs with embedded attacks (prompt injection, hidden instructions, role confusion). One `.toml` per attack technique.
+  - [p1-extraction-judge/](prompts/p1-extraction-judge/) — LLM-as-Judge for P1 extraction business correctness
+    - [versions/01/](prompts/p1-extraction-judge/versions/01/) — Judge version 01
+      - `system-prompt.jinja` — Evaluation criteria (field formats, allowed values, factual grounding)
+      - `user-prompt.jinja` — Template with `{{ data.input }}` (original input) and `{{ data.output }}` (extraction output)
+      - `metadata.toml` — Version description, date, and design rationale (business correctness only, not security)
   - [p2-classification/](prompts/p2-classification/) — Classifies line of business from P1 extraction output
     - [versions/01/](prompts/p2-classification/versions/01/) — Prompt version 01
       - `system-prompt.jinja` — System prompt with classification rules and anti-injection instructions
